@@ -30,6 +30,8 @@ max_budget = 100
 init_offer = 0
 min_ask_price = 20
 init_ask_price = 100
+non_rl_policy = agents.MarketAgent.get_random_offer
+
 ## name of the RL agent
 rl_agent = "Jarvis"
 
@@ -100,7 +102,7 @@ for i in range (0, num_episodes):
             if (a_id == rl_agent):
                 new_offer = a.target_policy(state) # call your RL algorithm here
             else:
-                new_offer = a.get_new_offer(state)
+                new_offer = non_rl_policy(a, state)
 
             offers[a_id] = new_offer
 
