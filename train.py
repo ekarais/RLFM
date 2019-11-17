@@ -31,8 +31,8 @@ def behavior_random_p(A, S):
     return 1/11
 
 #Problem settings
-num_episodes = 10
-num_sellers = 5 
+num_episodes = 100
+num_sellers = 4 
 num_buyers = 5 
 max_budget = 100
 init_offer = 0
@@ -42,7 +42,7 @@ init_ask_price = 100
 rl_agent = "Jarvis"
 
 # Creating data structures
-names = ['Bob', 'Alice', 'Eve', 'John', 'Nick', 'Giannis', 'Joel', 'Ben', 'Furkan', rl_agent]
+names = ['Alice', 'Eve', 'John', 'Nick', 'Giannis', 'Joel', 'Ben', 'Furkan', rl_agent]
 
 agent_list = [] # this exists because the MarketEnvironment wants lists
 agent_dict = {} # the code will use this because it is much more handy
@@ -105,7 +105,7 @@ for i in range (0, num_episodes):
             if (a_id == rl_agent):
                 new_offer = a.b_policy(a.behavior_buyer, state) # call your RL algorithm here
             else:
-                new_offer = a.get_random_offer(state)
+                new_offer = a.get_new_offer(state)
 
             offers[a_id] = new_offer
 
@@ -127,11 +127,6 @@ for i in range (0, num_episodes):
                 
 
     
-print('')        
-print(pd.DataFrame(market.deal_history))
-print('')        
-print(market.offers)
-print('')
 
 total_rewards = {}
 for a_id, a in agent_dict.items():
@@ -144,6 +139,6 @@ with np.printoptions(precision=2, suppress=True):
     print(agent_dict[rl_agent].Q_table)
 
 for i in range(0, 11):
-    print(f"Last offer = {i*10}  ==> Next offer = {agent_dict[rl_agent].target_policy(i)}")
+    print(f"Last offer = {i*10}  ==> Next offer = {agent_dict[rl_agent].target_policy(i*10)}")
 
 np.save('Q_values.npy', agent_dict[rl_agent].Q_table)
