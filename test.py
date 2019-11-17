@@ -24,8 +24,8 @@ def get_state(agent_id, market):
 
 #Problem settings
 num_episodes = 10
-num_sellers = 5 #not used for now
-num_buyers = 5 #not used for now
+num_sellers = 5 
+num_buyers = 5 
 max_budget = 100
 init_offer = 0
 min_ask_price = 20
@@ -58,12 +58,6 @@ for i in range(num_sellers, num_sellers + num_buyers):
     agent_list.append(b)
     agent_dict[names[i]] = b
 
-'''
-Q = np.random.rand(11,11)
-C = np.zeros((11,11))
-gamma = 0.9
-# may have to create the greedy policy w.r.t. Q here, to make behavior policy epsilon-soft.
-'''
 
 # Creating the market
 market = MarketEnvironment(sellers=agent_list[0:num_sellers], buyers=agent_list[num_sellers:num_sellers+num_buyers], max_steps=10,  
@@ -126,29 +120,7 @@ for i in range (0, num_episodes):
                 if (market.done[k]):
                     agent_dict[k].set_done()
                 
-                #agent_dict[k].done = market.done[k]
 
-            
-    # Learning the q function
-    '''
-    for b_id, b in agent_dict.items():
-        if (isinstance(b, Seller)):
-            continue
-
-        G = 0
-        W = 1
-        for i in range(0, len(b.rewards)-2):
-            t = len(b.rewards) - 2 - i
-            S_t = b.actions[t]//10
-            A_t = b.actions[t+1]//10
-
-            G = gamma*G + b.rewards[t+1]
-            C[S_t, A_t] = C[S_t, A_t] + W
-            Q[S_t, A_t] = Q[S_t, A_t] + (W/C[S_t, A_t])*(G - Q[S_t, A_t])
-            if A_t != policy(S_t, Q):
-                continue
-            W = W * (1/behavior_random_p(A_t, S_t))
-    '''
 
 print('')        
 print(pd.DataFrame(market.deal_history))
