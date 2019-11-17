@@ -21,16 +21,25 @@ class MarketAgent:
         self.actions = [] # to enable off-policy MC
         self.rewards = []
         self.done = False
-        
+        self.total_rewards = 0 # to enable comparing agents' performances
+        self.eval = False # Flag determining if the agent is in evaluation mode (to stop learning)
+
     def __repr__(self):
         return str(self)
     
     def __str__(self):
         return '(' + self.agent_id + ', ' + str(self.reservation_price) + ')'
     
+    def evaluate(self):
+        '''
+        Puts the agent in evaluation mode. For non-learning agents, there should be no difference
+        between eval mode switched on and off.
+        '''
+        self.eval = True
+
     def get_new_offer(self, last_offer):
         '''
-        Default action function for non-learning agents in the blackbox setting. The next bid is a random variable drawn 
+        Generic action function for non-learning agents in the blackbox setting. The next bid is a random variable drawn 
         between the last bid and budget. If the last bid was too close to the budget, the next bid is the whole budget. 
         '''
         if last_offer == self.reservation_price:
@@ -47,16 +56,36 @@ class MarketAgent:
 
     def get_random_offer(self, last_offer):
         '''
-        Default action function for non-learning agents in the blackbox setting. The next bid is a random variable drawn 
-        between the last bid and budget. If the last bid was too close to the budget, the next bid is the whole budget. 
+        Generic action function for non-learning agents in the blackbox setting. The next bid is a random variable drawn 
+        uniformly from the set of all possible actions. 
         '''
        
-        if self.agent_id.split()[0] == 'Seller':
+        if (isinstance(self, Seller)):
             return np.random.random_integers(low=2, high=10) * 10
         else:
             return np.random.random_integers(low=0, high=10) * 10
 
-        
+
+    def get_random_offer_p(self, A, S):
+        '''
+        The probabililty distribution for the policy implemented by get_random_offer():
+        '''
+        return 1/11
+
+    def set_done(self):
+        '''
+        Sets the agent's done field. For agents which learn at the end of every episode, this
+        function should implement the learning algorithm. See MonteCarlo_MarketAgent for an example.
+        '''
+
+        self.done = True
+
+
+    def reset(self):
+        self.actions = [] 
+        self.rewards = []
+        self.done = False
+
 class Buyer(MarketAgent):    
     
     pass
@@ -67,18 +96,50 @@ class Seller(MarketAgent):
     pass
        
         
-    
-    
-'''
-Old, unnecessary initialization code for buyer and seller:
+class MonteCarlo_MarketAgent(MarketAgent):
 
-def __init__(self, agent_id: str,  reservation_price: float):
-        """
-        A buyer agent that extends the market agent
-        :param agent_id: a unique id that differentiates this agent to other agents
-        :param reservation_price: the reservation price, or maximum price that this agent is
-        willing to buy
-        """
+    def __init__(self, agent_id: str, reservation_price: float, b_policy: callable, b_policy_dist: callable):
         super().__init__(agent_id, reservation_price)
+        # assumes the state-action space is fixed (0 to 100, 11 states, 11 actions)
+        self.Q_table = np.random.rand(11,11)
+        self.C_table = np.zeros((11,11))
+        self.gamma = 1
+        self.b_policy = b_policy
+        self.b_policy_dist = b_policy_dist
+        self.behavior_buyer = Buyer('Behavior', self.reservation_price) # needed because some 
+                                                        # MarketAgent functions require 'self'
         
-'''
+
+    def set_done(self):
+        '''
+        Sets the agents done field, and performs an iteration of the Monte Carlo algorithm.
+        '''
+        self.done = True
+
+        if (self.eval == True):
+            return
+
+        G = 0
+        W = 1
+        for i in range(0, len(self.rewards)-2):
+            t = len(self.rewards) - 2 - i
+            S_t = self.actions[t]//10
+            A_t = self.actions[t+1]//10
+
+            G = self.gamma*G + self.rewards[t+1]
+            self.C_table[S_t, A_t] = self.C_table[S_t, A_t] + W
+            self.Q_table[S_t, A_t] = self.Q_table[S_t, A_t] + (W/self.C_table[S_t, A_t])*(G - self.Q_table[S_t, A_t])
+            
+            if (A_t != self.target_policy(S_t)):
+                continue
+
+            W = W * (1/self.b_policy_dist(self.behavior_buyer, A_t, S_t))
+
+    def target_policy(self, S_t):
+        '''
+        Given a state, returns the action according to the agent's computed target policy.
+        '''
+
+        return np.argmax(self.Q_table[S_t//10])*10
+
+    
