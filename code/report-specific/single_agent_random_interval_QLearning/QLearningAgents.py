@@ -69,7 +69,7 @@ class QLearningBuyer(Buyer):
         # If Agent has just had a deal, update self.done
         if ((not self.done) and (reward != 0)):
             #self.done = True
-            if verbose: print(f'Agent done! Reward is {reward}')
+            if verbose: print(f'{self.agent_id} done! Reward is {reward}')
 
         self.state = self.next_state
         
@@ -138,6 +138,6 @@ class QLearningSeller(Seller):
         # If Agent has just had a deal, update self.done
         if ((not self.done) and (reward != 0)):
             #self.done = True
-            if verbose: print(f'Agent done!')
+            if verbose: print(f'{self.agent_id} done!')
                 
         self.state = self.next_state

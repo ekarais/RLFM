@@ -112,8 +112,8 @@ class RandomMatcher(Matcher):
                 deal_price = random.uniform(considered_seller['offer'], considered_buyer[
                     'offer'])
                 if self.reward_on_reference:
-                    rewards[considered_buyer['id']] = considered_buyer['res_price'] - considered_buyer['offer']
-                    rewards[considered_seller['id']] = considered_seller['offer'] - considered_seller['res_price']
+                    rewards[considered_buyer['id']] = considered_buyer['res_price'] - deal_price #considered_buyer['offer']
+                    rewards[considered_seller['id']] = deal_price - considered_seller['res_price']#considered_seller['offer'] 
                 else:
                     rewards[considered_buyer['id']] = considered_buyer['offer'] - deal_price
                     rewards[considered_seller['id']] = deal_price - considered_seller['offer']
