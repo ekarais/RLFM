@@ -113,16 +113,18 @@ def calculate_steps(n_stats, episode, steps, steps_sum, steps_list):
         steps_sum += steps
         return steps_sum, 0
            
-def plot_stats(agents, n_stats, PATH, steps_list=None):
+def plot_stats(buyers, sellers, n_stats, PATH, steps_list=None):
     '''
     Plot statistics from the training/testing episodes
     '''
     # Plot Rewards evolution
-    for agent in agents:
-        if(agent.reservation_price < agent.default_price):
-            plt.plot(np.arange(0, len(agent.rewards)*n_stats, n_stats), agent.rewards, 'b', label=f'{agent.agent_id}')
-        else:
-            plt.plot(np.arange(0, len(agent.rewards)*n_stats, n_stats), agent.rewards, 'r', label=f'{agent.agent_id}')
+    buyer_colors = plt.cm.jet(np.linspace(0.0,0.4,len(buyers)))
+    seller_colors = plt.cm.jet(np.linspace(0.6,1.0,len(sellers)))
+    for j, agent in enumerate(buyers):
+        plt.plot(np.arange(0, len(agent.rewards)*n_stats, n_stats), agent.rewards, color=buyer_colors[j], label=f'{agent.agent_id}')
+    for j, agent in enumerate(sellers):
+        plt.plot(np.arange(0, len(agent.rewards)*n_stats, n_stats), agent.rewards, color=seller_colors[j], label=f'{agent.agent_id}')
+            
     plt.title('Averaged Rewards')
     plt.xlabel('Episodes')
     plt.ylabel(f'Rewards Average over {n_stats} Episodes')
@@ -131,6 +133,7 @@ def plot_stats(agents, n_stats, PATH, steps_list=None):
     plt.show()
     
     if steps_list:
+        agents = buyers + sellers
         # Plot Steps evolution
         plt.plot(np.arange(0, len(agents[0].rewards)*n_stats, n_stats), steps_list, label=f'{agents[0].agent_id}')
         plt.title('Steps per Episode')
