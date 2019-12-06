@@ -1,3 +1,5 @@
 git+https://github.com/zhy0/dmarket_rl
 stable_baselines
 ray[rllib]
+pandas
+matplotlib
